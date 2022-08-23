@@ -10,11 +10,17 @@ const listContacts = async () => {
 const getContactById = async (contactId) => {
   const contacts = await listContacts();
   const requiredContact = contacts.find((contact) => contact.id === contactId);
+  if (!requiredContact) {
+    return { contacts, requiredContact: null };
+  }
   return { contacts, requiredContact };
 };
 
 const removeContact = async (contactId) => {
   const { contacts, requiredContact } = await getContactById(contactId);
+  if (!requiredContact) {
+    return false;
+  }
   const requiredIdx = contacts.indexOf(requiredContact);
   if (requiredIdx === -1) {
     return false;
@@ -41,6 +47,9 @@ const addContact = async ({ name, email, phone }) => {
 
 const updateContact = async (contactId, body) => {
   const { contacts, requiredContact } = await getContactById(contactId);
+  if (!requiredContact) {
+    return false;
+  }
   const array = Object.keys(body);
   array.forEach((field) => (requiredContact[field] = body[field]));
   await reWriteFile(contacts);

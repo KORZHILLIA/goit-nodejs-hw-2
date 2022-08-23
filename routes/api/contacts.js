@@ -62,6 +62,14 @@ router.delete("/:contactId", async (req, res, next) => {
 router.put("/:contactId", async (req, res, next) => {
   const { contactId } = req.params;
   if (!Object.keys(req.body).length) {
+    return res.status(400).json({ message: "Missing fields" });
+  }
+
+  const updatedContact = await contactsHandlers.updateContact(
+    contactId,
+    req.body
+  );
+  if (!updatedContact) {
     return res.status(404).json({ message: "Not found" });
   }
 
@@ -76,10 +84,6 @@ router.put("/:contactId", async (req, res, next) => {
       message,
     });
   }
-  const updatedContact = await contactsHandlers.updateContact(
-    contactId,
-    req.body
-  );
   res.status(200).json({
     updatedContact,
   });
