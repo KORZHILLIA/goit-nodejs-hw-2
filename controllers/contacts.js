@@ -1,6 +1,6 @@
 const services = require("../services/contacts");
 const { createReqError } = require("../helpers");
-const { validateReqBody } = require("../middlewares");
+const { validateReqBody, validateReqFavorite } = require("../middlewares");
 
 const getAllContacts = async (_, res) => {
   const contacts = await services.listContacts();
@@ -63,18 +63,18 @@ const updateFavorite = async (req, res, next) => {
     body,
     params: { contactId },
   } = req;
-  validateReqBody(body);
-  const bodyArr = Object.keys(body);
-  if (!bodyArr.length || !bodyArr.includes("favorite")) {
-    throw createReqError(400, "Missing field 'favorite'");
-  }
-  if (bodyArr.length > 1) {
-    for (let key of bodyArr) {
-      if (key !== "favorite") {
-        delete body[key];
-      }
-    }
-  }
+  validateReqFavorite(body);
+  // const bodyArr = Object.keys(body);
+  // if (!bodyArr.length || !bodyArr.includes("favorite")) {
+  //   throw createReqError(400, "Missing field 'favorite'");
+  // }
+  // if (bodyArr.length > 1) {
+  //   for (let key of bodyArr) {
+  //     if (key !== "favorite") {
+  //       delete body[key];
+  //     }
+  //   }
+  // }
   const contact = await services.updateStatusContact(contactId, body);
   if (!contact) {
     throw createReqError(
