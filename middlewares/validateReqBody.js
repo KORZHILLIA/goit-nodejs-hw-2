@@ -19,4 +19,8 @@ function createValidationError(validationResult) {
   }
 }
 
-module.exports = { validateReqBody, validateReqFavorite };
+module.exports = {
+  validateReqBody,
+  validateReqFavorite,
+  createValidationError,
+};
