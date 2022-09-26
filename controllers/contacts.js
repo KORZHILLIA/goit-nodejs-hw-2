@@ -64,17 +64,6 @@ const updateFavorite = async (req, res, next) => {
     params: { contactId },
   } = req;
   validateReqFavorite(body);
-  // const bodyArr = Object.keys(body);
-  // if (!bodyArr.length || !bodyArr.includes("favorite")) {
-  //   throw createReqError(400, "Missing field 'favorite'");
-  // }
-  // if (bodyArr.length > 1) {
-  //   for (let key of bodyArr) {
-  //     if (key !== "favorite") {
-  //       delete body[key];
-  //     }
-  //   }
-  // }
   const contact = await services.updateStatusContact(contactId, body);
   if (!contact) {
     throw createReqError(

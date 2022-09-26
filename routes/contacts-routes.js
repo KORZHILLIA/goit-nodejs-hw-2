@@ -1,24 +1,43 @@
 const express = require("express");
-const contactsCtrlr = require("../controllers");
+const { contactsCtrlr } = require("../controllers");
+const { authenticate } = require("../middlewares");
 const { createTryCatchWrapper } = require("../helpers");
 
 const router = express.Router();
 
-router.get("/", createTryCatchWrapper(contactsCtrlr.getAllContacts));
+router.get(
+  "/",
+  authenticate,
+  createTryCatchWrapper(contactsCtrlr.getAllContacts)
+);
 
-router.get("/:contactId", createTryCatchWrapper(contactsCtrlr.getContactById));
+router.get(
+  "/:contactId",
+  authenticate,
+  createTryCatchWrapper(contactsCtrlr.getContactById)
+);
 
-router.post("/", createTryCatchWrapper(contactsCtrlr.addNewContact));
+router.post(
+  "/",
+  authenticate,
+  createTryCatchWrapper(contactsCtrlr.addNewContact)
+);
 
 router.delete(
   "/:contactId",
+  authenticate,
   createTryCatchWrapper(contactsCtrlr.deleteContact)
 );
 
-router.put("/:contactId", createTryCatchWrapper(contactsCtrlr.updateContact));
+router.put(
+  "/:contactId",
+  authenticate,
+  createTryCatchWrapper(contactsCtrlr.updateContact)
+);
 
 router.patch(
   "/:contactId/favorite",
+  authenticate,
   createTryCatchWrapper(contactsCtrlr.updateFavorite)
 );
 
