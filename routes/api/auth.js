@@ -1,6 +1,6 @@
 const express = require("express");
 const { createTryCatchWrapper } = require("../../helpers");
-const { authenticate } = require("../../middlewares");
+const { authenticate, upload } = require("../../middlewares");
 const { authCtrlr } = require("../../controllers");
 
 const router = express.Router();
@@ -16,5 +16,12 @@ router.get(
 );
 
 router.post("/logout", authenticate, createTryCatchWrapper(authCtrlr.logout));
+
+router.patch(
+  "/avatars",
+  authenticate,
+  upload.single("avatar"),
+  createTryCatchWrapper(authCtrlr.updateAvatar)
+);
 
 module.exports = router;

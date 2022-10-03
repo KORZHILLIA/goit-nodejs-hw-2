@@ -1,3 +1,4 @@
+const gravatar = require("gravatar");
 const { User } = require("../models");
 const { hashPassword } = require("../helpers");
 
@@ -6,9 +7,11 @@ const findUser = async (email) => {
 };
 
 const createUser = async ({ email, password }) => {
+  const avatarURL = gravatar.url(email);
   return User.create({
     email,
     password: await hashPassword(password),
+    avatarURL,
     subscription: "starter",
   });
 };

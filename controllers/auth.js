@@ -1,7 +1,16 @@
+const fs = require("fs").promises;
+const path = require("path");
 const { findUser, createUser } = require("../services/auth");
-const { createReqError, comparePasswords, makeToken } = require("../helpers");
+const {
+  createReqError,
+  comparePasswords,
+  makeToken,
+  resize,
+} = require("../helpers");
 const { validateUserBody } = require("../middlewares");
 const { User } = require("../models");
+
+const avatarsPath = path.join(__dirname, "../", "public", "avatars");
 
 const register = async (req, res) => {
   const { body } = req;
@@ -10,10 +19,11 @@ const register = async (req, res) => {
     throw createReqError(409, "Email in use");
   }
   validateUserBody(body);
-  const result = await createUser(body);
-  res
-    .status(201)
-    .json({ email: result.email, subscription: result.subscription });
+  const { email, subscription } = await createUser(body);
+  res.status(201).json({
+    email,
+    subscription,
+  });
 };
 
 const login = async (req, res) => {
@@ -50,4 +60,17 @@ const logout = async (req, res) => {
   res.status(204);
 };
 
-module.exports = { register, login, getCurrentUser, logout };
+const updateAvatar = async (req, res) => {
+  const { path: tempPath, originalname } = req.file;
+  const { _id } = req.user;
+  const [fileExtension] = originalname.split(".").reverse();
+  const newFileName = `${_id}.${fileExtension}`;
+  const ultimateAvatarPath = path.join(avatarsPath, newFileName);
+  await fs.rename(tempPath, ultimateAvatarPath);
+  await resize(ultimateAvatarPath);
+  const avatarURL = path.join("avatars", newFileName);
+  await User.findByIdAndUpdate(_id, { avatarURL });
+  res.json({ avatarURL });
+};
+
+module.exports = { register, login, getCurrentUser, logout, updateAvatar };
