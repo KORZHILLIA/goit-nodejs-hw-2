@@ -6,9 +6,12 @@ const {
   comparePasswords,
   makeToken,
   resize,
+  sendMail,
 } = require("../helpers");
-const { validateUserBody } = require("../middlewares");
+const { validateUserBody, validateEmailBody } = require("../middlewares");
 const { User } = require("../models");
+const { message } = require("../models/joiModels/contact");
+const { BASE_URL } = process.env;
 
 const avatarsPath = path.join(__dirname, "../", "public", "avatars");
 
@@ -19,11 +22,53 @@ const register = async (req, res) => {
     throw createReqError(409, "Email in use");
   }
   validateUserBody(body);
-  const { email, subscription } = await createUser(body);
+  const { email, subscription, verificationToken } = await createUser(body);
+  const mail = {
+    to: email,
+    from,
+    subject: "Please, verify your e-mail",
+    html: `<a href="${BASE_URL}/users/verify/${verificationToken}">Follow link to verify e-mail</a>`,
+  };
+  await sendMail(mail);
+
   res.status(201).json({
     email,
     subscription,
+    verificationToken,
   });
+};
+
+const sendVerifyEmail = async (req, res) => {
+  const { verificationToken } = req.params;
+  const user = await User.findOne({ verificationToken });
+  if (!user) {
+    throw createReqError(404, "User not found");
+  }
+  await User.findByIdAndUpdate(user._id, {
+    verificationToken: null,
+    verify: true,
+  });
+  res.json({ message: "Verification successful" });
+};
+
+const resendVerifyEmail = async (req, res) => {
+  const { email } = req.body;
+  validateEmailBody(body);
+  const user = User.findOne({ email });
+  if (!user) {
+    throw createReqError(404, "User not found");
+  }
+  if (user.verify) {
+    throw createReqError(400, "Verification has already been passed");
+  }
+  const { verificationToken } = user;
+  const mail = {
+    to: email,
+    subject: "Please, verify your e-mail",
+    html: `<a href="${BASE_URL}/users/verify/${verificationToken}">Follow link to verify e-mail</a>`,
+  };
+  await sendMail(mail);
+  res.json({ message: "Verification email sent" });
 };
 
 const login = async (req, res) => {
@@ -32,6 +77,9 @@ const login = async (req, res) => {
   const user = await findUser(body.email);
   if (!user) {
     throw createReqError(401, "Email or password is wrong");
+  }
+  if (!user.verify) {
+    throw createReqError(401, "Email is not verified");
   }
   const isPasswordsEqual = await comparePasswords(body.password, user.password);
   if (!isPasswordsEqual) {
@@ -73,4 +121,12 @@ const updateAvatar = async (req, res) => {
   res.json({ avatarURL });
 };
 
-module.exports = { register, login, getCurrentUser, logout, updateAvatar };
+module.exports = {
+  register,
+  login,
+  sendVerifyEmail,
+  resendVerifyEmail,
+  getCurrentUser,
+  logout,
+  updateAvatar,
+};

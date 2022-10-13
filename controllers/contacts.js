@@ -58,7 +58,7 @@ const updateContact = async (req, res) => {
   res.json({ contact, message: "Contact successfully updated" });
 };
 
-const updateFavorite = async (req, res, next) => {
+const updateFavorite = async (req, res) => {
   const {
     body,
     params: { contactId },

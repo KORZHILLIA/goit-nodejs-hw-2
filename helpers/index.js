@@ -3,6 +3,7 @@ const createTryCatchWrapper = require("./createTryCatchWrapper");
 const { hashPassword, comparePasswords } = require("./passwordHandlers");
 const { makeToken } = require("./jwt");
 const resize = require("./resize");
+const sendMail = require("./sendMail");
 
 module.exports = {
   createReqError,
@@ -11,4 +12,5 @@ module.exports = {
   comparePasswords,
   makeToken,
   resize,
+  sendMail,
 };
