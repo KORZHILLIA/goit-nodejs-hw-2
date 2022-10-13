@@ -7,6 +7,13 @@ const router = express.Router();
 
 router.post("/signup", createTryCatchWrapper(authCtrlr.register));
 
+router.get(
+  "/verify/:verificationToken",
+  createTryCatchWrapper(authCtrlr.sendVerifyEmail)
+);
+
+router.post("/verify", createTryCatchWrapper(authCtrlr.resendVerifyEmail));
+
 router.post("/login", createTryCatchWrapper(authCtrlr.login));
 
 router.get(
